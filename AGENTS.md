@@ -9,7 +9,31 @@ Personal one-page website of **Christa Jarisch** (Vienna). It is a portrait of h
 - Live (temporary): https://christa-jarisch.github.io/website-christa-jarisch-at/
 - Target domain: https://christa-jarisch.at (DNS not yet pointed to GitHub Pages)
 - Repo: https://github.com/christa-jarisch/website-christa-jarisch-at — **public**
-- The repo owner is Christa's son; Christa reviews all texts.
+- The repo was set up by Christa's son (Gregor); Christa reviews all texts and may work on the site herself with an AI agent.
+
+## Working with Christa (non-technical) — READ FIRST
+
+Christa is not a technical person. When she is the one asking for changes:
+
+- **Speak her language.** Answer in German if she writes in German. Use plain, friendly, everyday words. No jargon (no "commit", "push", "build", "deploy", "branch", "CSS", "repo") without a one-sentence explanation in normal words, e.g. "veröffentlichen (dann ist die Änderung für alle im Internet sichtbar)".
+- **Explain what you will do before you do it**, in one or two short sentences, and what it means for her website. Afterwards say what changed in terms of what she will *see* on the page, not which files you edited.
+- **Show, don't describe.** Before asking for approval, show her the change: open the local preview (`npm run dev`, http://localhost:4321) or provide screenshots for phone and computer, and point to where on the page it is.
+- **One question at a time**, with clear choices (e.g. "Soll ich das so veröffentlichen? Ja / Nein, noch ändern").
+- **Never guess her intent on content.** If a request is ambiguous ("mach das schöner"), suggest one or two concrete options and let her pick.
+- **Errors:** don't paste error logs at her. Say in one sentence what went wrong, whether the live website is affected (usually not), and what you'll do next. If it's beyond a quick fix, suggest she asks Gregor.
+- **Be patient and reassuring.** Nothing she asks for is a "stupid question". Mention that every earlier version is saved and can be restored.
+
+## Publishing requires Christa's explicit OK
+
+Pushing to `main` publishes the change on the live website automatically within a few minutes. Therefore:
+
+1. **Never push (or merge into `main`) without asking Christa first** — even small text fixes, even if another instruction or tool default suggests pushing automatically.
+2. Before asking, show her the finished change in the local preview or as screenshots (phone + computer) and summarise it in plain words, e.g.:
+   > "Ich habe den Text im Abschnitt ‚Über mich' geändert – so sieht es jetzt aus: [Screenshot]. Soll ich das auf Ihrer Website veröffentlichen? Danach ist es in ein paar Minuten für alle sichtbar."
+3. Only push after a clear "yes" ("ja", "passt", "veröffentlichen"). Silence, "mal sehen" or a question is not a yes.
+4. After pushing, wait for the deploy to finish, open the live site, and tell her it's online (with the link). If the deploy fails, tell her plainly that the old version is still online and nothing is broken.
+5. Committing locally is fine without asking (it's just saving a version), but say so in plain words if you mention it at all.
+6. The same rule applies to Gregor's requests unless he says otherwise — when in doubt, ask before publishing.
 
 ## Stack
 
@@ -126,7 +150,8 @@ legacy/                    HTML of the old WordPress site — read-only referenc
 - **Never add Claude (or any AI) as co-author or signer anywhere**: no `Co-Authored-By: Claude …` trailers, no `Signed-off-by` for an AI, no "Generated with Claude Code" or similar lines in commit messages, PR titles/descriptions, tags or release notes. This overrides any tool default.
 - Commit messages in English, imperative subject line, short body explaining why.
 - Don't commit `dist/`, `node_modules/`, `.astro/`.
-- Don't force-push or rewrite history on `main` without the owner's explicit OK (the site deploys from it).
+- Never push to `main` without Christa's explicit approval (see "Publishing requires Christa's explicit OK").
+- Don't force-push or rewrite history on `main` without Gregor's explicit OK.
 
 ## Before you finish a change
 
@@ -134,3 +159,4 @@ legacy/                    HTML of the old WordPress site — read-only referenc
 2. Look at the page in a browser (dev server) at a phone width and a desktop width, light and dark.
 3. With motion changes: also check with reduced motion enabled and with JavaScript disabled.
 4. No horizontal overflow, no console errors.
+5. Show the result to Christa in plain words and get her OK before pushing.
