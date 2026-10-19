@@ -14,6 +14,13 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Serve from the github.io project URL until christa-jarisch.at points to GitHub Pages.
+# Once the custom domain is live, delete these two lines (defaults are the custom domain)
+# and set the domain under Settings → Pages.
+env:
+  SITE_URL: https://christa-jarisch.github.io
+  BASE_PATH: /website-christa-jarisch-at/
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -3,11 +3,12 @@ import Base from './Base.astro';
 
 interface Props { title: string }
 const { title } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
 <Base title={`${title} – Christa Jarisch`} noindex>
   <header class="wrap bar">
-    <a href="/" class="back">← Christa <em>Jarisch</em></a>
+    <a href={base} class="back">← Christa <em>Jarisch</em></a>
   </header>
   <main class="wrap legal">
     <h1>{title}</h1>
