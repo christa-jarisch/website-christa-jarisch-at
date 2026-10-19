@@ -1,0 +1,28 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { contact } from '../data/site';
+---
+
+<Legal title="Impressum">
+  <p>Informationspflicht laut § 5 E-Commerce-Gesetz und Offenlegungspflicht laut § 25 Mediengesetz.</p>
+
+  <dl>
+    <dt>Name</dt><dd>{contact.name}</dd>
+    <dt>Praxis</dt><dd>{contact.street}, {contact.city}, Österreich</dd>
+    <dt>Firmensitz</dt><dd>Linzer Straße 18/17, 1140 Wien</dd>
+    <dt>Telefon</dt><dd><a href={contact.phoneHref}>{contact.phone}</a></dd>
+    <dt>E-Mail</dt><dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+    <dt>Rechtsform</dt><dd>Einzelunternehmen</dd>
+    <dt>Unternehmensgegenstand</dt><dd>Lebens- und Sozialberatung</dd>
+    <dt>Kammer</dt><dd>Wirtschaftskammer Österreich (WKO)</dd>
+    <dt>Berufsrecht</dt><dd>Gewerbeordnung, <a href="https://www.ris.bka.gv.at" target="_blank" rel="noopener">www.ris.bka.gv.at</a></dd>
+    <!-- TODO: zuständige Gewerbebehörde ergänzen (war auf der alten Seite leer) -->
+    <dt>UID-Nummer</dt><dd>keine</dd>
+  </dl>
+
+  <h2>Bildnachweis</h2>
+  <p>Porträtfotos von Christa Jarisch: © Daniel Eberharter, WisR GmbH Wien.</p>
+
+  <h2>Haftung für Links</h2>
+  <p>Für die Inhalte verlinkter externer Seiten sind ausschließlich deren Betreiber verantwortlich.</p>
+</Legal>

@@ -1,0 +1,44 @@
+---
+import '../styles/global.css';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = 'Christa Jarisch – Lebens- & Sozialberaterin und Supervisorin in Wien',
+  description = 'Christa Jarisch begleitet Menschen und Teams durch Veränderungen: psychosoziale Beratung, Supervision und Seminare zum Übergang in die Pension. Praxis in 1160 Wien.',
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="de-AT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#f7f1e8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16181f" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_AT" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+    <Footer />
+  </body>
+</html>

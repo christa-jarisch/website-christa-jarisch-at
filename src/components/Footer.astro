@@ -1,0 +1,31 @@
+---
+import { contact } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap row">
+    <p>© {year} {contact.name} · {contact.city}</p>
+    <nav aria-label="Rechtliches">
+      <a href="/impressum/">Impressum</a>
+      <a href="/datenschutz/">Datenschutz</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: 2rem;
+    font-size: .875rem;
+    color: var(--ink-soft);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  p { margin: 0; }
+  nav { display: flex; gap: 1.5rem; }
+</style>
