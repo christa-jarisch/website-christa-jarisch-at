@@ -1,0 +1,160 @@
+---
+// Page-wide motion layer: GSAP + ScrollTrigger + Lenis.
+// Everything is gated behind prefers-reduced-motion; without JS the page is fully static and readable.
+---
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import Lenis from 'lenis';
+  import 'lenis/dist/lenis.css';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.documentElement;
+  const mm = gsap.matchMedia();
+
+  // Wrap each word in a span so it can be lit up while scrolling.
+  function splitWords(el: HTMLElement) {
+    const text = el.textContent ?? '';
+    el.setAttribute('aria-label', text);
+    el.innerHTML = text
+      .split(/(\s+)/)
+      .map((w) => (w.trim() ? `<span class="w" aria-hidden="true">${w}</span>` : w))
+      .join('');
+    return el.querySelectorAll<HTMLElement>('.w');
+  }
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    root.classList.add('has-motion');
+
+    // Smooth scrolling on mouse/trackpad devices only; touch keeps native scrolling.
+    let lenis: Lenis | undefined;
+    if (matchMedia('(pointer: fine)').matches) {
+      lenis = new Lenis({ lerp: 0.1, anchors: { offset: -72 } });
+      lenis.on('scroll', ScrollTrigger.update);
+      const raf = (t: number) => lenis!.raf(t * 1000);
+      gsap.ticker.add(raf);
+      gsap.ticker.lagSmoothing(0);
+    }
+
+    // 1 · Hero intro: name rises out of masks, arch opens, rest fades in.
+    const arch = document.querySelector<HTMLElement>('.arch')!;
+    const archImg = arch.querySelector('img')!;
+    gsap.set('.hero h1 .line-inner', { y: 0, yPercent: 110 });
+    gsap.set('[data-hero-fade]', { autoAlpha: 0, y: 24 });
+    gsap.set(arch, { clipPath: 'inset(100% 0% 0% 0% round 999px 999px 20px 20px)' });
+    gsap.set(archImg, { scale: 1.25 });
+    root.classList.remove('motion');
+
+    gsap.timeline({ defaults: { ease: 'expo.out', duration: 1.4 }, delay: 0.15 })
+      .to(arch, { clipPath: 'inset(0% 0% 0% 0% round 999px 999px 20px 20px)', duration: 1.6 }, 0)
+      .to(archImg, { scale: 1, duration: 2.2 }, 0)
+      .to('.hero h1 .line-inner', { yPercent: 0, stagger: 0.12 }, 0.2)
+      .to('[data-hero-fade]', { autoAlpha: 1, y: 0, stagger: 0.09, duration: 1.1 }, 0.55);
+
+    // 2 · Quiet parallax inside photo frames.
+    document.querySelectorAll<HTMLElement>('[data-parallax-frame]').forEach((frame) => {
+      gsap.fromTo(frame.querySelector('img'), { yPercent: -6 }, {
+        yPercent: 6,
+        ease: 'none',
+        scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: true },
+      });
+    });
+
+    // Marquee drifts a little faster while scrolling.
+    gsap.to('.marquee-track', {
+      x: -200,
+      ease: 'none',
+      scrollTrigger: { trigger: '.marquee', start: 'top bottom', end: 'bottom top', scrub: 0.5 },
+    });
+
+    // 3 · Words light up as you read (pull quote, big quote).
+    document.querySelectorAll<HTMLElement>('[data-scrub-words]').forEach((el) => {
+      gsap.fromTo(splitWords(el), { opacity: 0.15 }, {
+        opacity: 1,
+        stagger: 0.08,
+        ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top 85%', end: 'bottom 45%', scrub: true },
+      });
+    });
+
+    // 4 · Strengths: accent rule draws, card rises.
+    gsap.utils.toArray<HTMLElement>('.org-card').forEach((card, i) => {
+      gsap.timeline({
+        scrollTrigger: { trigger: '.org-grid', start: 'top 80%' },
+        delay: i * 0.12,
+      })
+        .from(card.querySelector('.rule'), { scaleX: 0, duration: 0.9, ease: 'expo.out' })
+        .from(card.querySelectorAll('h3, p'), { y: 24, autoAlpha: 0, stagger: 0.08, duration: 0.9, ease: 'power3.out' }, 0.1);
+    });
+
+    // 5 · Beliefs band: each line brightens as it passes the centre.
+    gsap.utils.toArray<HTMLElement>('.beliefs li').forEach((li) => {
+      gsap.timeline({
+        scrollTrigger: { trigger: li, start: 'top 85%', end: 'bottom 15%', scrub: true },
+      })
+        .fromTo(li, { opacity: 0.2, x: -30 }, { opacity: 1, x: 0, ease: 'power2.out' })
+        .to(li, { opacity: 0.35, ease: 'power2.in' }, '+=0.6');
+    });
+
+    // 6 · Stations: stacked sticky cards — earlier ones recede.
+    const cards = gsap.utils.toArray<HTMLElement>('.station');
+    cards.forEach((card, i) => {
+      const next = cards[i + 1];
+      if (!next) return;
+      gsap.fromTo(card, { scale: 1, filter: 'brightness(1)' }, {
+        scale: 0.94,
+        filter: 'brightness(0.94)',
+        ease: 'none',
+        scrollTrigger: { trigger: next, start: 'top 85%', end: 'top 20%', scrub: true },
+      });
+    });
+
+    // 7 · Timeline: line draws with scroll, dots switch on as it reaches them.
+    gsap.fromTo('.timeline-progress', { scaleY: 0 }, {
+      scaleY: 1,
+      ease: 'none',
+      scrollTrigger: { trigger: '.timeline', start: 'top 65%', end: 'bottom 65%', scrub: true },
+    });
+    gsap.utils.toArray<HTMLElement>('.timeline li').forEach((li) => {
+      ScrollTrigger.create({
+        trigger: li,
+        start: 'top 65%',
+        onEnter: () => li.classList.add('is-on'),
+        onLeaveBack: () => li.classList.remove('is-on'),
+      });
+      gsap.from(li, {
+        x: 24,
+        autoAlpha: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: li, start: 'top 88%' },
+      });
+    });
+
+    // 8 · Magnetic contact button (pointer devices only).
+    if (matchMedia('(pointer: fine)').matches) {
+      document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((btn) => {
+        const xTo = gsap.quickTo(btn, 'x', { duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+        const yTo = gsap.quickTo(btn, 'y', { duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+        btn.addEventListener('pointermove', (e) => {
+          const r = btn.getBoundingClientRect();
+          xTo((e.clientX - r.left - r.width / 2) * 0.25);
+          yTo((e.clientY - r.top - r.height / 2) * 0.35);
+        });
+        btn.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
+      });
+    }
+
+    return () => {
+      lenis?.destroy();
+      root.classList.remove('has-motion');
+    };
+  });
+
+  // Reduced motion: make sure nothing stays hidden.
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    root.classList.remove('motion');
+  });
+</script>

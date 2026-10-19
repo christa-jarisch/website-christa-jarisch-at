@@ -4,11 +4,12 @@ import { contact } from '../data/site';
 ---
 
 <Legal title="Impressum">
+  <!-- TODO: mit Christa klären, ob das Gewerbe noch aufrecht ist; ggf. Unternehmensangaben entfernen. -->
   <p>Informationspflicht laut § 5 E-Commerce-Gesetz und Offenlegungspflicht laut § 25 Mediengesetz.</p>
 
   <dl>
     <dt>Name</dt><dd>{contact.name}</dd>
-    <dt>Praxis</dt><dd>{contact.street}, {contact.city}, Österreich</dd>
+    <dt>Anschrift</dt><dd>Wurlitzergasse 50, 1160 Wien, Österreich</dd>
     <dt>Firmensitz</dt><dd>Linzer Straße 18/17, 1140 Wien</dd>
     <dt>Telefon</dt><dd><a href={contact.phoneHref}>{contact.phone}</a></dd>
     <dt>E-Mail</dt><dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>

@@ -1,17 +1,20 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Motion from '../components/Motion.astro';
 import portrait from '../assets/christa-portrait.jpg';
 import laughing from '../assets/christa-lachend.jpg';
 import {
-  contact, hero, about, values, organisation, offers,
-  questions, education, press, quote, directions,
+  contact, hero, about, values, organisation, beliefs,
+  stations, education, press, quote,
 } from '../data/site';
+
+const marqueeWords = ['Klarheit', 'Vertrauen', 'Veränderung', 'Durchatmen', 'Ankommen', 'Struktur', 'Herz', 'Freiheit'];
 
 const nav = [
   { href: '#ueber-mich', label: 'Über mich' },
   { href: '#staerken', label: 'Stärken' },
-  { href: '#angebot', label: 'Angebot' },
+  { href: '#erfahrung', label: 'Erfahrung' },
   { href: '#werdegang', label: 'Werdegang' },
 ];
 
@@ -19,22 +22,21 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: contact.name,
-  jobTitle: 'Dipl. Lebens- und Sozialberaterin, Supervisorin',
-  telephone: contact.phone,
   email: `mailto:${contact.email}`,
   url: Astro.site?.href,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: contact.street,
-    postalCode: '1160',
-    addressLocality: 'Wien',
-    addressCountry: 'AT',
-  },
+  address: { '@type': 'PostalAddress', addressLocality: 'Wien', addressCountry: 'AT' },
 };
 ---
 
 <Base>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+  <!-- Hide the hero until the motion script takes over; falls back to visible after 3s. -->
+  <script is:inline slot="head">
+    if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      document.documentElement.classList.add('motion');
+      setTimeout(() => document.documentElement.classList.remove('motion'), 3000);
+    }
+  </script>
 
   <header class="topbar">
     <div class="wrap topbar-inner">
@@ -50,29 +52,43 @@ const jsonLd = {
     <!-- HERO -->
     <section class="hero wrap">
       <div class="hero-text">
-        <p class="eyebrow">{hero.eyebrow}</p>
+        <p class="eyebrow" data-hero-fade>{hero.eyebrow}</p>
         <h1>
-          Christa<br /><em>Jarisch</em>
+          <span class="line"><span class="line-inner">Christa</span></span>
+          <span class="line"><span class="line-inner"><em>Jarisch</em></span></span>
         </h1>
-        <p class="hero-claim">{hero.title}</p>
-        <p class="hero-lead">{hero.lead}</p>
-        <div class="hero-cta">
-          <a href="#kontakt" class="btn btn-primary">Kennenlernen – 20 Min. gratis</a>
-          <a href="#ueber-mich" class="btn btn-ghost">Mehr über mich</a>
+        <p class="hero-claim" data-hero-fade>{hero.title}</p>
+        <p class="hero-lead" data-hero-fade>{hero.lead}</p>
+        <div class="hero-cta" data-hero-fade>
+          <a href="#ueber-mich" class="btn btn-primary">Mehr über mich</a>
+          <a href="#kontakt" class="btn btn-ghost">Kontakt aufnehmen</a>
         </div>
       </div>
       <figure class="hero-photo">
-        <Image
-          src={portrait}
-          alt="Porträt von Christa Jarisch, lächelnd, mit roten Ohrringen"
-          widths={[360, 540, 684]}
-          sizes="(min-width: 56rem) 34vw, 80vw"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <figcaption>Wien, 16. Bezirk</figcaption>
+        <div class="arch" data-parallax-frame>
+          <Image
+            src={portrait}
+            alt="Porträt von Christa Jarisch, lächelnd, mit roten Ohrringen"
+            widths={[360, 540, 684]}
+            sizes="(min-width: 56rem) 34vw, 80vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+        <figcaption data-hero-fade>Aus Wien, mit Herz</figcaption>
       </figure>
     </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        {[0, 1].map(() => (
+          <span class="marquee-group">
+            {marqueeWords.map((w) => <span>{w}<i>✦</i></span>)}
+          </span>
+        ))}
+      </div>
+    </div>
 
     <!-- ÜBER MICH -->
     <section id="ueber-mich" class="section about">
@@ -82,9 +98,11 @@ const jsonLd = {
           <h2 class="section-title">{about.heading}</h2>
           {about.paragraphs.map((p) => <p>{p}</p>)}
         </div>
-        <aside class="about-side reveal">
-          <Image src={laughing} alt="Christa Jarisch lachend in einem Wiener Gastgarten" widths={[300]} class="about-photo" />
-          <blockquote class="pull">„{about.quote}“</blockquote>
+        <aside class="about-side">
+          <div class="about-photo" data-parallax-frame>
+            <Image src={laughing} alt="Christa Jarisch lachend in einem Wiener Gastgarten" widths={[300]} />
+          </div>
+          <blockquote class="pull" data-scrub-words>„{about.quote}“</blockquote>
         </aside>
       </div>
 
@@ -99,7 +117,7 @@ const jsonLd = {
       </ul>
     </section>
 
-    <!-- ORGANISATION -->
+    <!-- STÄRKEN -->
     <section id="staerken" class="section org">
       <div class="wrap">
         <div class="org-head reveal">
@@ -109,7 +127,8 @@ const jsonLd = {
         </div>
         <ul class="org-grid" role="list">
           {organisation.items.map((item) => (
-            <li class="org-card reveal">
+            <li class="org-card">
+              <span class="rule" aria-hidden="true"></span>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
             </li>
@@ -118,34 +137,32 @@ const jsonLd = {
       </div>
     </section>
 
-    <!-- KENNEN SIE DAS -->
-    <section class="section questions" aria-labelledby="fragen">
+    <!-- HALTUNG -->
+    <section class="section beliefs" aria-labelledby="haltung">
       <div class="wrap">
-        <p class="eyebrow">Kennen Sie das?</p>
-        <h2 id="fragen" class="visually-hidden">Kennen Sie das?</h2>
+        <h2 class="eyebrow" id="haltung">Was mich leitet</h2>
         <ul role="list">
-          {questions.map((q) => <li class="reveal">{q}</li>)}
+          {beliefs.map((b) => <li>{b}</li>)}
         </ul>
       </div>
     </section>
 
-    <!-- ANGEBOT -->
-    <section id="angebot" class="section">
+    <!-- ERFAHRUNG -->
+    <section id="erfahrung" class="section">
       <div class="wrap">
-        <p class="eyebrow">Wobei ich begleite</p>
-        <h2 class="section-title reveal">Beratung, Supervision &amp; Seminare.</h2>
-        <div class="offers">
-          {offers.map((o) => (
-            <article class:list={['offer', 'reveal', { 'offer-wide': o.details }]}>
-              <p class="offer-kicker">{o.kicker}</p>
-              <h3>{o.title}</h3>
-              <p>{o.text}</p>
-              {o.details && (
-                <ul class="offer-details">
-                  {o.details.map((d) => <li>{d}</li>)}
+        <p class="eyebrow">Stationen</p>
+        <h2 class="section-title reveal">Erfahrung aus vielen Welten.</h2>
+        <div class="stations">
+          {stations.map((s, i) => (
+            <article class="station" style={`--i: ${i}`}>
+              <p class="station-kicker"><span class="station-num">0{i + 1}</span>{s.kicker}</p>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+              {s.details && (
+                <ul class="station-details">
+                  {s.details.map((d) => <li>{d}</li>)}
                 </ul>
               )}
-              {o.note && <p class="offer-note">{o.note}</p>}
             </article>
           ))}
         </div>
@@ -155,18 +172,21 @@ const jsonLd = {
     <!-- WERDEGANG -->
     <section id="werdegang" class="section path">
       <div class="wrap path-grid">
-        <div class="reveal">
+        <div class="path-head reveal">
           <p class="eyebrow">Aus- und Weiterbildungen</p>
           <h2 class="section-title">Ein Leben lang dazulernen.</h2>
         </div>
-        <ol class="timeline" role="list">
-          {education.map((e) => (
-            <li class="reveal">
-              <strong>{e.title}</strong>
-              <span>{e.by}</span>
-            </li>
-          ))}
-        </ol>
+        <div class="timeline-wrap">
+          <span class="timeline-progress" aria-hidden="true"></span>
+          <ol class="timeline" role="list">
+            {education.map((e) => (
+              <li>
+                <strong>{e.title}</strong>
+                <span>{e.by}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
 
       <div class="wrap press">
@@ -189,8 +209,9 @@ const jsonLd = {
 
     <!-- ZITAT -->
     <section class="quote-band">
-      <figure class="wrap reveal">
-        <blockquote>{quote.text}</blockquote>
+      <div class="glow" aria-hidden="true"></div>
+      <figure class="wrap">
+        <blockquote data-scrub-words>{quote.text}</blockquote>
         <figcaption>— {quote.author}</figcaption>
       </figure>
     </section>
@@ -200,37 +221,28 @@ const jsonLd = {
       <div class="wrap contact-grid">
         <div class="reveal">
           <p class="eyebrow">Kontakt</p>
-          <h2 class="section-title">Ich freue mich auf Sie.</h2>
+          <h2 class="section-title">Schreiben Sie mir.</h2>
           <p class="contact-lead">
-            Beim Erstgespräch schenke ich Ihnen die ersten <strong>20 Minuten</strong> zum Kennenlernen.
-            Termine nach telefonischer Vereinbarung.
+            Ob Austausch, Anfrage oder einfach ein Hallo – ich freue mich, von Ihnen zu hören.
           </p>
           <div class="contact-actions">
-            <a class="btn btn-primary" href={contact.phoneHref}>Anrufen: {contact.phone}</a>
-            <a class="btn btn-ghost" href={`mailto:${contact.email}`}>{contact.email}</a>
+            <a class="btn btn-primary" data-magnetic href={`mailto:${contact.email}`}>{contact.email}</a>
+            <a class="btn btn-ghost" href={contact.phoneHref}>{contact.phone}</a>
           </div>
         </div>
         <div class="contact-card reveal">
-          <h3>Praxis</h3>
-          <address>
-            {contact.name}<br />
-            {contact.street}<br />
-            {contact.city}
-          </address>
-          <h3>Anreise</h3>
-          <ul role="list">
-            {directions.map((d) => <li>{d}</li>)}
-          </ul>
-          <a
-            class="map-link"
-            href="https://www.openstreetmap.org/search?query=Wurlitzergasse%2050%2C%201160%20Wien"
-            target="_blank"
-            rel="noopener"
-          >Auf der Karte ansehen ↗</a>
+          <h3>{contact.name}</h3>
+          <p>{contact.city}, Österreich</p>
+          <dl>
+            <dt>E-Mail</dt><dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+            <dt>Telefon</dt><dd><a href={contact.phoneHref}>{contact.phone}</a></dd>
+          </dl>
         </div>
       </div>
     </section>
   </main>
+
+  <Motion />
 </Base>
 
 <style>
@@ -279,15 +291,19 @@ const jsonLd = {
     letter-spacing: -.045em;
     font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 144;
   }
+  .hero h1 .line { display: block; overflow: hidden; padding-bottom: .1em; margin-bottom: -.1em; }
+  .hero h1 .line-inner { display: inline-block; will-change: transform; }
   .hero h1 em {
     color: var(--accent);
     font-style: italic;
     padding-left: .6em;
+    padding-right: .1em;
   }
   .hero-claim {
     font-family: var(--serif);
     font-style: italic;
     font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+    line-height: 1.25;
     margin-top: 2rem;
     margin-bottom: .75rem;
   }
@@ -300,6 +316,13 @@ const jsonLd = {
     justify-self: center;
     width: min(100%, 26rem);
   }
+  /* Phones/tablets: portrait first, a bit smaller, so Christa is visible right away */
+  @media (max-width: 55.99rem) {
+    .hero { padding-top: 2rem; }
+    /* height cap keeps the portrait from filling a landscape phone screen */
+    .hero-photo { order: -1; width: min(72%, 20rem, 46svh); }
+    .hero .hero-photo figcaption { left: auto; right: -14%; bottom: 1rem; white-space: nowrap; }
+  }
   .hero-photo::before {
     content: '';
     position: absolute;
@@ -308,13 +331,19 @@ const jsonLd = {
     border-radius: 48% 52% 40% 60% / 55% 45% 55% 45%;
     z-index: -1;
   }
-  .hero-photo :global(img) {
-    width: 100%;
+  .arch {
     aspect-ratio: 4 / 5;
-    object-fit: cover;
-    object-position: 50% 20%;
+    overflow: hidden;
     border-radius: 999px 999px var(--radius) var(--radius);
     box-shadow: 0 30px 60px -30px rgb(20 20 40 / .45);
+  }
+  .arch :global(img) {
+    width: 100%;
+    height: 116%;
+    margin-top: -8%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    will-change: transform;
   }
   .hero-photo figcaption {
     position: absolute;
@@ -336,17 +365,27 @@ const jsonLd = {
     border-radius: 50%;
     background: var(--accent);
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-text > *, .hero-photo {
-      animation: rise .9s var(--ease) both;
-    }
-    .hero-text > :nth-child(2) { animation-delay: .08s; }
-    .hero-text > :nth-child(3) { animation-delay: .16s; }
-    .hero-text > :nth-child(4) { animation-delay: .24s; }
-    .hero-text > :nth-child(5) { animation-delay: .32s; }
-    .hero-photo { animation-delay: .2s; }
-    @keyframes rise { from { opacity: 0; translate: 0 1.5rem; } }
+
+  /* hidden start states, only until the motion script takes over */
+  :global(.motion) .hero h1 .line-inner { transform: translateY(110%); }
+  :global(.motion) [data-hero-fade] { opacity: 0; }
+  :global(.motion) .arch { clip-path: inset(100% 0 0 0 round 999px 999px var(--radius) var(--radius)); }
+
+  /* ---------- marquee ---------- */
+  .marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    padding-block: 1.1rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1rem + 1.6vw, 2.4rem);
+    white-space: nowrap;
   }
+  .marquee-track { display: flex; width: max-content; animation: marquee 48s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-group span { padding-inline: .9em; }
+  .marquee i { font-style: normal; color: var(--accent); font-size: .55em; vertical-align: middle; margin-left: 1.8em; }
+  @keyframes marquee { to { translate: -50% 0; } }
 
   /* ---------- about ---------- */
   .about { background: var(--paper-2); }
@@ -355,12 +394,20 @@ const jsonLd = {
     .about-grid { grid-template-columns: 1.4fr 1fr; align-items: start; }
   }
   .about-grid p { max-width: 38rem; }
-  .about-side { display: grid; gap: 1.5rem; }
+  .about-side { display: grid; gap: 2rem; }
   .about-photo {
     width: 100%;
     max-width: 22rem;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
     border-radius: var(--radius);
     rotate: 2deg;
+  }
+  .about-photo :global(img) {
+    width: 100%;
+    height: 116%;
+    margin-top: -8%;
+    object-fit: cover;
   }
   .pull {
     margin: 0;
@@ -404,95 +451,110 @@ const jsonLd = {
   .org-card {
     padding: 2rem 1.5rem 2rem 0;
     border-bottom: 1px solid var(--line);
-    position: relative;
   }
-  .org-card::before {
-    content: '';
+  .rule {
     display: block;
     width: 2.5rem;
     height: 3px;
     background: var(--accent);
     margin-bottom: 1.5rem;
+    transform-origin: left;
     transition: width .5s var(--ease);
   }
-  .org-card:hover::before { width: 5rem; }
+  .org-card:hover .rule { width: 5rem; }
   .org-card h3 { font-size: 1.5rem; margin-bottom: .75rem; }
   .org-card p { margin: 0; color: var(--ink-soft); }
 
-  /* ---------- questions ---------- */
-  .questions {
+  /* ---------- beliefs (dark band) ---------- */
+  .beliefs {
     --band-ink: #f7f1e8;
     background: light-dark(#1f2a44, #0e1016);
     color: var(--band-ink);
   }
-  .questions .eyebrow { color: #ff8f80; }
-  .questions ul { list-style: none; padding: 0; margin: 0; }
-  .questions li {
+  .beliefs .eyebrow { color: #ff8f80; }
+  .beliefs ul { list-style: none; padding: 0; margin: 0; }
+  .beliefs li {
     font-family: var(--serif);
-    font-size: clamp(1.6rem, 1rem + 2.6vw, 3.2rem);
-    line-height: 1.15;
-    letter-spacing: -.02em;
-    padding-block: .9rem;
-    border-bottom: 1px solid color-mix(in oklab, var(--band-ink) 18%, transparent);
+    font-size: clamp(2rem, 1rem + 4vw, 4.6rem);
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    padding-block: 1.2rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--band-ink) 16%, transparent);
     text-wrap: balance;
   }
-  .questions li:nth-child(even) { font-style: italic; padding-left: clamp(0rem, 8vw, 8rem); }
-  .visually-hidden {
-    position: absolute; width: 1px; height: 1px; overflow: hidden;
-    clip-path: inset(50%); white-space: nowrap;
-  }
+  .beliefs li:nth-child(even) { font-style: italic; padding-left: clamp(0rem, 10vw, 10rem); }
 
-  /* ---------- offers ---------- */
-  .offers {
-    display: grid;
-    gap: 1.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  }
-  .offer {
-    container-type: inline-size;
+  /* ---------- stations (sticky stack) ---------- */
+  .stations { display: grid; gap: 1.5rem; }
+  .station {
+    position: sticky;
+    top: calc(5.5rem + var(--i) * 1.5rem);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: clamp(1.5rem, 3vw, 2.5rem);
-    transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+    border-radius: calc(var(--radius) * 1.4);
+    padding: clamp(1.75rem, 4vw, 3.5rem);
+    min-height: min(22rem, 70svh);
+    box-shadow: 0 -12px 40px -24px rgb(0 0 0 / .25);
+    transform-origin: 50% 0;
   }
-  .offer:hover { transform: translateY(-4px); box-shadow: 0 24px 48px -28px rgb(0 0 0 / .35); }
-  @media (min-width: 56rem) {
-    .offers { grid-template-columns: repeat(2, 1fr); }
-    .offer-wide { grid-column: 1 / -1; }
+  .station-kicker {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--sky);
+    margin-bottom: 1rem;
   }
-  .offer-kicker { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--sky); margin-bottom: .5rem; }
-  .offer h3 { font-size: clamp(1.7rem, 1.3rem + 1.4vw, 2.4rem); margin-bottom: 1rem; }
-  .offer-details {
+  .station-num {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+  .station h3 { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.6rem); margin-bottom: 1.25rem; }
+  .station p { max-width: 40rem; color: var(--ink-soft); font-size: 1.08em; }
+  .station-details {
     list-style: none;
     padding: 0;
-    margin: 1.5rem 0;
+    margin: 1.5rem 0 0;
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
   }
-  .offer-details li {
+  .station-details li {
     font-size: .85rem;
     padding: .35rem .9rem;
     border-radius: 999px;
     background: var(--paper-2);
   }
-  .offer-note { font-size: .9rem; color: var(--ink-soft); margin: 0; }
 
   /* ---------- path ---------- */
   .path { background: var(--paper-2); }
   .path-grid { display: grid; gap: 2rem; }
-  @media (min-width: 56rem) { .path-grid { grid-template-columns: 1fr 1.3fr; } }
-  .timeline { list-style: none; padding: 0; margin: 0; position: relative; }
-  .timeline::before {
+  @media (min-width: 56rem) {
+    .path-grid { grid-template-columns: 1fr 1.3fr; align-items: start; }
+    .path-head { position: sticky; top: 7rem; }
+  }
+  .timeline-wrap { position: relative; }
+  .timeline-wrap::before,
+  .timeline-progress {
     content: '';
     position: absolute;
-    left: .35rem;
+    left: calc(.375rem - 1px);
     top: .5rem;
-    bottom: .5rem;
-    width: 1px;
+    bottom: 2.25rem;
+    width: 2px;
     background: var(--line);
   }
+  .timeline-progress {
+    background: var(--accent);
+    transform-origin: top;
+    transform: scaleY(1);
+  }
+  .timeline { list-style: none; padding: 0; margin: 0; }
   .timeline li {
     position: relative;
     padding: 0 0 1.75rem 2rem;
@@ -506,9 +568,11 @@ const jsonLd = {
     width: .75rem;
     height: .75rem;
     border-radius: 50%;
-    background: var(--paper-2);
+    background: var(--accent);
     border: 2px solid var(--accent);
+    transition: background-color .4s, scale .4s var(--ease);
   }
+  :global(.has-motion) .timeline li:not(.is-on)::before { background: var(--paper-2); scale: .8; }
   .timeline strong { font-weight: 600; }
   .timeline span { color: var(--ink-soft); font-size: .92rem; }
 
@@ -533,15 +597,34 @@ const jsonLd = {
   .press-date { font-size: .85rem; color: var(--ink-soft); }
 
   /* ---------- quote ---------- */
-  .quote-band { padding-block: clamp(4rem, 10vw, 8rem); text-align: center; }
-  .quote-band figure { margin-inline: auto; max-width: 52rem; }
+  .quote-band {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(5rem, 14vw, 11rem);
+    text-align: center;
+    isolation: isolate;
+  }
+  .glow {
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    background:
+      radial-gradient(35% 45% at 30% 40%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
+      radial-gradient(40% 50% at 70% 60%, color-mix(in oklab, var(--sky) 20%, transparent), transparent 70%);
+    filter: blur(40px);
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    to { transform: translate(6%, -4%) rotate(8deg) scale(1.08); }
+  }
+  .quote-band figure { margin-inline: auto; max-width: 56rem; }
   .quote-band blockquote {
     margin: 0;
     font-family: var(--serif);
     font-style: italic;
-    font-size: clamp(1.8rem, 1rem + 3.2vw, 3.6rem);
-    line-height: 1.15;
-    letter-spacing: -.02em;
+    font-size: clamp(2rem, 1rem + 3.8vw, 4.2rem);
+    line-height: 1.12;
+    letter-spacing: -.025em;
     text-wrap: balance;
   }
   .quote-band blockquote::before {
@@ -556,7 +639,8 @@ const jsonLd = {
   /* ---------- contact ---------- */
   .contact { border-top: 1px solid var(--line); }
   .contact-grid { display: grid; gap: 3rem; }
-  @media (min-width: 56rem) { .contact-grid { grid-template-columns: 1.3fr 1fr; align-items: start; } }
+  @media (min-width: 56rem) { .contact-grid { grid-template-columns: 1.3fr 1fr; align-items: center; } }
+  .contact .section-title { font-size: clamp(2.8rem, 1.6rem + 5vw, 6rem); }
   .contact-lead { font-size: 1.15em; max-width: 34rem; }
   .contact-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
   .contact-actions .btn { overflow-wrap: anywhere; }
@@ -566,10 +650,15 @@ const jsonLd = {
     border-radius: var(--radius);
     padding: 2rem;
   }
-  .contact-card h3 { font-size: 1.3rem; margin-bottom: .5rem; }
-  .contact-card h3:not(:first-child) { margin-top: 1.75rem; }
-  .contact-card address { font-style: normal; }
-  .contact-card ul { padding-left: 1.1rem; margin: 0; color: var(--ink-soft); font-size: .95rem; }
-  .contact-card li + li { margin-top: .4rem; }
-  .map-link { display: inline-block; margin-top: 1.5rem; font-weight: 600; font-size: .9rem; }
+  .contact-card h3 { font-size: 1.6rem; margin-bottom: .25rem; }
+  .contact-card > p { color: var(--ink-soft); }
+  .contact-card dl { display: grid; grid-template-columns: max-content 1fr; gap: .5rem 1.25rem; margin: 1.5rem 0 0; }
+  .contact-card dt { color: var(--ink-soft); font-size: .9rem; }
+  .contact-card dd { margin: 0; overflow-wrap: anywhere; }
+  .contact-card dd a { display: inline-block; padding-block: .35rem; }
+  .contact-card dl { align-items: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .station { position: static; }
+  }
 </style>

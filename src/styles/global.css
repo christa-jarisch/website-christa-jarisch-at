@@ -25,6 +25,10 @@
   --ease: cubic-bezier(.2, .7, .2, 1);
 }
 
+@media (min-width: 100rem) {
+  :root { --max: 84rem; }
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -41,6 +45,17 @@ body {
   font-size: clamp(1rem, .95rem + .25vw, 1.125rem);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Soft paper grain over everything */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: .06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3 {
@@ -65,6 +80,10 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 ::selection { background: var(--accent); color: var(--accent-ink); }
+
+/* Slide-in animations start off-canvas; never let them cause sideways scrolling.
+   `clip` (unlike `hidden`) keeps position: sticky working. */
+main { overflow-x: clip; }
 
 .wrap {
   width: min(100% - 2 * var(--gutter), var(--max));
